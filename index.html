@@ -35,7 +35,7 @@
         }
 
         function sendToThingSpeak(onOff, freq) {
-            const url = `https://api.thingspeak.com/update?api_key=${writeApiKey}&field1=${onOff}&field2=${freq}`;
+            const url = `https://api.thingspeak.com/update?api_key=${writeApiKey}=0&field1=${onOff}&field2=${freq}`;
             fetch(url)
                 .then(response => response.json())
                 .then(data => console.log("Updated:", data))
