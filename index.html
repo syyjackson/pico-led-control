@@ -21,22 +21,27 @@
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script>
         const broker = "test.mosquitto.org";
-        const port = 8080;  // WebSocket port for Mosquitto
+        const port = 8081;  // Secure WebSocket port for Mosquitto
         const topic = "pico/led/control";
         let isOn = true;
 
-        const client = mqtt.connect(`ws://${broker}:${port}`, { 
+        const client = mqtt.connect(`wss://${broker}:${port}`, { 
             clientId: "web_client_" + Math.random().toString(16).substr(2, 8),
             keepalive: 60
         });
-        client.on("connect", () => console.log("Connected to MQTT broker"));
+
+        client.on("connect", () => {
+            console.log("Connected to MQTT broker");
+            client.subscribe("pico/led/control", (err) => {
+                if (!err) console.log("Subscribed to pico/led/control");
+                else console.error("Subscription error:", err);
+            });
+            // Initialize only after connection
+            sendCommand(1, 1.0);
+        });
         client.on("message", (t, m) => console.log("Received:", m.toString()));
         client.on("error", (err) => console.error("MQTT error:", err));
         client.on("close", () => console.log("Connection closed"));
-        client.subscribe("pico/led/control", (err) => {
-            if (!err) console.log("Subscribed to pico/led/control");
-            else console.error("Subscription error:", err);
-        });
 
         function toggleLED() {
             isOn = !isOn;
@@ -56,9 +61,6 @@
                 else console.error("Publish error:", err);
             });
         }
-
-        // Initialize
-        sendCommand(1, 1.0);
     </script>
 </body>
 </html>
